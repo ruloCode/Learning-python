@@ -1,7 +1,10 @@
 
 
 # Learning Python
-![snakerocket](https://github.com/user-attachments/assets/2a13d148-c1a9-4798-8980-cef9c4161288)
+
+<div align="center">
+  <img src="https://images.squarespace-cdn.com/content/v1/5005c50824ac900968010593/1452574401070-O55RK00AWODYG8LBLDHF/snakerocket.jpg" alt="Logo de Python" width="300">
+</div>
 
 ¡Bienvenido a mi repositorio **Learning Python**! 👋
 
