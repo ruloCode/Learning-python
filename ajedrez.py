@@ -1,9 +1,9 @@
-
 # Resumen del proyecto
 """
 Este proyecto implementa un juego de ajedrez en Python. 
 Permite a dos jugadores mover piezas en un tablero 8x8, 
 validar movimientos según las reglas del ajedrez y alternar turnos.
+Además, incluye un sistema de puntuación y métricas.
 """
 
 # Representación del tablero de ajedrez
@@ -22,7 +22,24 @@ tablero = [
     ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']   # Fila 7: Piezas blancas
 ]
 
-# Función para imprimir el tablero de manera legible
+# Diccionario de valores de las piezas
+valores_piezas = {
+    'p': 1, 'P': 1,
+    'n': 3, 'N': 3,
+    'b': 3, 'B': 3,
+    'r': 5, 'R': 5,
+    'q': 9, 'Q': 9,
+    'k': 0, 'K': 0  # El rey no tiene valor de captura
+}
+
+# Variables para el score y métricas
+score_blanco = 0
+score_negro = 0
+movimientos_blanco = 0
+movimientos_negro = 0
+piezas_capturadas_blanco = []
+piezas_capturadas_negro = []
+
 # Función para imprimir el tablero con colores y contrastes mejorados
 def imprimir_tablero(tablero):
     # Colores ANSI
@@ -45,6 +62,7 @@ def imprimir_tablero(tablero):
         print(f" {8 - i}")
     print("   " + " ".join(["a ", "b ", "c ", "d ", "e ", "f ", "g ", "h "]))
     print()
+
 # Función para verificar si una posición está dentro del tablero
 def es_posicion_valida(fila, columna):
     return 0 <= fila < 8 and 0 <= columna < 8
@@ -147,14 +165,47 @@ def verificar_camino_diagonal(tablero, fila_inicial, columna_inicial, nueva_fila
 def alternar_turno(turno_actual):
     return 'blanco' if turno_actual == 'negro' else 'negro'
 
-# Función para mover una pieza
+# Función para mover una pieza y actualizar el score
 def mover_pieza(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna, turno):
+    global score_blanco, score_negro, movimientos_blanco, movimientos_negro, piezas_capturadas_blanco, piezas_capturadas_negro
+
     if es_movimiento_valido(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna, turno):
         pieza = tablero[fila_inicial][columna_inicial]
+        pieza_capturada = tablero[nueva_fila][nueva_columna]
+
+        # Actualizar el score si se captura una pieza
+        if pieza_capturada != 0:
+            valor_pieza = valores_piezas.get(pieza_capturada, 0)
+            if turno == 'blanco':
+                score_blanco += valor_pieza
+                piezas_capturadas_blanco.append(pieza_capturada)
+            else:
+                score_negro += valor_pieza
+                piezas_capturadas_negro.append(pieza_capturada)
+
+        # Mover la pieza
         tablero[fila_inicial][columna_inicial] = 0
         tablero[nueva_fila][nueva_columna] = pieza
+
+        # Actualizar el número de movimientos
+        if turno == 'blanco':
+            movimientos_blanco += 1
+        else:
+            movimientos_negro += 1
+
         return True
     return False
+
+# Función para mostrar el score y las métricas
+def mostrar_metricas():
+    print("\n--- Métricas del Juego ---")
+    print(f"Score Blanco: {score_blanco}")
+    print(f"Score Negro: {score_negro}")
+    print(f"Movimientos Blanco: {movimientos_blanco}")
+    print(f"Movimientos Negro: {movimientos_negro}")
+    print(f"Piezas capturadas por Blanco: {', '.join(piezas_capturadas_blanco)}")
+    print(f"Piezas capturadas por Negro: {', '.join(piezas_capturadas_negro)}")
+    print("--------------------------\n")
 
 # Juego principal
 def jugar_ajedrez():
@@ -162,6 +213,7 @@ def jugar_ajedrez():
     while True:
         print(f"Turno de las piezas {turno}")
         imprimir_tablero(tablero)
+        mostrar_metricas()
         
         # Pedir al usuario que ingrese el movimiento
         try:
