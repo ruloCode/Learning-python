@@ -71,5 +71,3 @@ print("Texto reemplazado:", nuevo_texto)  # Salida: Hola, Mundo
 texto_nlp = "  Este es un TEXTO de Ejemplo para NLP.  "
 texto_limpio = texto_nlp.strip().lower().replace("ejemplo", "muestra")
 print("Texto limpio para NLP:", texto_limpio)  # Salida: este es un texto de muestra para nlp.
-
-# Fin del archivo clase_2.py

@@ -90,5 +90,3 @@ print("Edad:", edad)
 # x = "Juan"
 # y = 25
 # print(x, y)  # Menos claro y propenso a confusiones
-
-# Fin del archivo clase_1.py
