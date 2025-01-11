@@ -7,29 +7,29 @@ Además, incluye un sistema de puntuación y métricas.
 """
 
 # Representación del tablero de ajedrez
-# - Letras mayúsculas para piezas blancas: P (peón), R (torre), N (caballo), B (alfil), Q (reina), K (rey).
-# - Letras minúsculas para piezas negras: p, r, n, b, q, k.
+# - Letras mayúsculas para piezas blancas: P (peón), T (torre), C (caballo), A (alfil), D (reina), R (rey).
+# - Letras minúsculas para piezas negras: p, t, c, a, d, r.
 # - El número 0 representa una casilla vacía.
 
 tablero = [
-    ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],  # Fila 0: Piezas negras
+    ['t', 'c', 'a', 'd', 'r', 'a', 'c', 't'],  # Fila 0: Piezas negras
     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],  # Fila 1: Peones negros
     [0, 0, 0, 0, 0, 0, 0, 0],                  # Fila 2: Casillas vacías
     [0, 0, 0, 0, 0, 0, 0, 0],                  # Fila 3: Casillas vacías
     [0, 0, 0, 0, 0, 0, 0, 0],                  # Fila 4: Casillas vacías
     [0, 0, 0, 0, 0, 0, 0, 0],                  # Fila 5: Casillas vacías
     ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],  # Fila 6: Peones blancos
-    ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']   # Fila 7: Piezas blancas
+    ['T', 'C', 'A', 'D', 'R', 'A', 'C', 'T']   # Fila 7: Piezas blancas
 ]
 
 # Diccionario de valores de las piezas
 valores_piezas = {
     'p': 1, 'P': 1,
-    'n': 3, 'N': 3,
-    'b': 3, 'B': 3,
-    'r': 5, 'R': 5,
-    'q': 9, 'Q': 9,
-    'k': 0, 'K': 0  # El rey no tiene valor de captura
+    'c': 3, 'C': 3,
+    'a': 3, 'A': 3,
+    't': 5, 'T': 5,
+    'd': 9, 'D': 9,
+    'r': 0, 'R': 0  # El rey no tiene valor de captura
 }
 
 # Variables para el score y métricas
@@ -82,20 +82,26 @@ def es_movimiento_valido(tablero, fila_inicial, columna_inicial, nueva_fila, nue
 
     # Verificar si la pieza pertenece al jugador actual
     if (turno == 'blanco' and pieza.islower()) or (turno == 'negro' and pieza.isupper()):
-        return False
+        return False  # No se puede mover una pieza del oponente
+
+    # Verificar si la casilla de destino está ocupada por una pieza aliada
+    if tablero[nueva_fila][nueva_columna] != 0:  # Solo verificar si hay una pieza
+        if (turno == 'blanco' and tablero[nueva_fila][nueva_columna].isupper()) or \
+           (turno == 'negro' and tablero[nueva_fila][nueva_columna].islower()):
+            return False  # No se puede mover a una casilla ocupada por una pieza aliada
 
     # Movimientos específicos para cada tipo de pieza
     if pieza.lower() == 'p':  # Peón
         return validar_movimiento_peon(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna, turno)
-    elif pieza.lower() == 'r':  # Torre
+    elif pieza.lower() == 't':  # Torre
         return validar_movimiento_torre(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna)
-    elif pieza.lower() == 'n':  # Caballo
+    elif pieza.lower() == 'c':  # Caballo
         return validar_movimiento_caballo(fila_inicial, columna_inicial, nueva_fila, nueva_columna)
-    elif pieza.lower() == 'b':  # Alfil
+    elif pieza.lower() == 'a':  # Alfil
         return validar_movimiento_alfil(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna)
-    elif pieza.lower() == 'q':  # Reina
+    elif pieza.lower() == 'd':  # Reina
         return validar_movimiento_reina(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna)
-    elif pieza.lower() == 'k':  # Rey
+    elif pieza.lower() == 'r':  # Rey
         return validar_movimiento_rey(fila_inicial, columna_inicial, nueva_fila, nueva_columna)
     return False
 
@@ -207,6 +213,60 @@ def mostrar_metricas():
     print(f"Piezas capturadas por Negro: {', '.join(piezas_capturadas_negro)}")
     print("--------------------------\n")
 
+# Función para verificar si el rey está en jaque
+def esta_en_jaque(tablero, turno):
+    # Encuentra la posición del rey del jugador actual
+    fila_rey, columna_rey = None, None
+    for i in range(8):
+        for j in range(8):
+            if (turno == 'blanco' and tablero[i][j] == 'R') or (turno == 'negro' and tablero[i][j] == 'r'):
+                fila_rey, columna_rey = i, j
+                break
+        if fila_rey is not None:
+            break
+
+    # Verifica si alguna pieza del oponente puede atacar al rey
+    oponente = 'negro' if turno == 'blanco' else 'blanco'
+    for i in range(8):
+        for j in range(8):
+            # Asegúrate de que la casilla no esté vacía antes de llamar a isupper() o islower()
+            if tablero[i][j] != 0:  # Solo verificar si hay una pieza
+                if (oponente == 'blanco' and tablero[i][j].isupper()) or (oponente == 'negro' and tablero[i][j].islower()):
+                    if es_movimiento_valido(tablero, i, j, fila_rey, columna_rey, oponente):
+                        return True  # El rey está en jaque
+    return False
+
+# Función para verificar si hay movimientos legales que salven al rey
+def hay_movimientos_legales(tablero, turno):
+    for i in range(8):
+        for j in range(8):
+            # Asegúrate de que la casilla no esté vacía antes de llamar a isupper() o islower()
+            if tablero[i][j] != 0:  # Solo verificar si hay una pieza
+                if (turno == 'blanco' and tablero[i][j].isupper()) or (turno == 'negro' and tablero[i][j].islower()):
+                    for nueva_fila in range(8):
+                        for nueva_columna in range(8):
+                            if es_movimiento_valido(tablero, i, j, nueva_fila, nueva_columna, turno):
+                                # Simular el movimiento
+                                pieza = tablero[i][j]
+                                tablero[i][j] = 0
+                                tablero[nueva_fila][nueva_columna] = pieza
+                                if not esta_en_jaque(tablero, turno):
+                                    # Deshacer el movimiento
+                                    tablero[i][j] = pieza
+                                    tablero[nueva_fila][nueva_columna] = 0
+                                    return True  # Hay un movimiento legal
+                                # Deshacer el movimiento
+                                tablero[i][j] = pieza
+                                tablero[nueva_fila][nueva_columna] = 0
+    return False
+
+# Función para verificar jaque mate
+def verificar_jake_mate(turno):
+    if esta_en_jaque(tablero, turno) and not hay_movimientos_legales(tablero, turno):
+        print(f"¡Jaque mate! Las piezas {turno} han perdido.")
+        return True
+    return False
+
 # Juego principal
 def jugar_ajedrez():
     turno = 'blanco'
@@ -231,6 +291,8 @@ def jugar_ajedrez():
             nueva_columna = ord(col_nueva) - ord('a')
             
             if mover_pieza(tablero, fila_inicial, columna_inicial, nueva_fila, nueva_columna, turno):
+                if verificar_jake_mate(turno):
+                    break  # Termina el juego si hay jaque mate
                 turno = alternar_turno(turno)
             else:
                 print("Movimiento no válido, intenta de nuevo.")
